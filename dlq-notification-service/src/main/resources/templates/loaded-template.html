@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+</head>
+<body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="padding:20px;background:#f4f4f4;">
+    <tr>
+        <td align="center">
+            <table width="600" style="max-width:600px;background:#ffffff;border-radius:6px;overflow:hidden;">
+                <tr>
+                    <td style="padding:20px 30px;text-align:center;">
+                        <h2 style="margin:0;color:#222;">Your Bag Has Been Loaded Onto the Plane</h2>
+                        <p style="margin:6px 0 0;color:#555;">
+                            Flight: <span th:text="${flightNumber}">FL123</span> — Departure: <span th:text="${departureAirport}">JFK</span>
+                        </p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="padding:18px 30px;color:#333;line-height:1.5;">
+                        <p style="margin:0 0 10px 0;">
+                            Your bag with tag number <strong th:text="${bagTag}">123456789</strong> has been loaded onto the plane and included in the flight.
+                        </p>
+
+                        <table cellpadding="0" cellspacing="0" style="width:100%;font-size:14px;color:#333;margin:10px 0;">
+                            <tr><td style="padding:6px 0;"><strong>Departure:</strong> <span th:text="${departureAirport}">JFK</span></td></tr>
+                            <tr><td style="padding:6px 0;"><strong>Arrival:</strong> <span th:text="${arrivalAirport}">LAX</span></td></tr>
+                        </table>
+
+                        <p style="margin:12px 0 0 0;">
+                            We will notify you of any updates regarding your bag during the flight or upon arrival.
+                        </p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="padding:14px 30px;background:#fafafa;font-size:12px;color:#777;text-align:center;">
+                        For questions, please visit:
+                        <a th:href="${helpUrl}" style="color:#007BFF;text-decoration:none;">Support</a>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

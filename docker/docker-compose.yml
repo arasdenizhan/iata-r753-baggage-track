@@ -1,0 +1,126 @@
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    healthcheck:
+      test: [ "CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    depends_on:
+      - zookeeper
+
+  kafka-init:
+    image: confluentinc/cp-kafka:7.5.0
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: ["sh", "-c", "kafka-topics --create --topic baggage.tracking --partitions 1 --replication-factor 1 --if-not-exists --bootstrap-server kafka:9092 && kafka-topics --create --topic mail.send.failures.dlq --partitions 1 --replication-factor 1 --if-not-exists --bootstrap-server kafka:9092"]
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+    depends_on:
+      - kafka
+
+  baggage-db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - baggage-db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: baggage
+      POSTGRES_USER: baggage
+      POSTGRES_PASSWORD: baggage123
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: mailhog
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI
+    restart: unless-stopped
+
+  management-service:
+    build:
+      context: ../management-service
+      dockerfile: Dockerfile
+    ports:
+      - "8090:8090"
+    environment:
+      DB_USER: baggage
+      DB_PASSWORD: baggage123
+      DB_HOST: baggage-db
+      DB_PORT: 5432
+      DB_NAME: baggage
+      DDL_AUTO: update
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      - baggage-db
+      - kafka
+      - kafka-init
+
+  notification-service:
+    build:
+      context: ../notification-service
+      dockerfile: Dockerfile
+    ports:
+      - "8091:8091"
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      MAIL_HOST: mailhog
+      MAIL_PORT: 1025
+    depends_on:
+      - mailhog
+      - kafka
+      - kafka-init
+
+  dlq-notification-service:
+    build:
+      context: ../dlq-notification-service
+      dockerfile: Dockerfile
+    ports:
+      - "8092:8092"
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      MAIL_HOST: mailhog
+      MAIL_PORT: 1025
+    depends_on:
+      - mailhog
+      - kafka
+      - kafka-init
+
+  tracking-ui:
+    build:
+      context: ../tracking-ui
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_API_INFO_URL: "http://management-service:8090/api/v1/baggage"
+        REACT_APP_API_SOCKET_URL: "http://management-service:8090/ws/luggage"
+    ports:
+      - "3000:3000"
+
+volumes:
+  baggage-db-data:

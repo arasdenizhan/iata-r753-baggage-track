@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+</head>
+<body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="padding:20px;background:#f4f4f4;">
+    <tr>
+        <td align="center">
+            <table width="600" style="max-width:600px;background:#ffffff;border-radius:6px;overflow:hidden;">
+                <tr>
+                    <td style="padding:20px 30px;text-align:center;">
+                        <h2 style="margin:0;color:#222;">Your Bag is on the Belt</h2>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="padding:18px 30px;color:#333;line-height:1.5;">
+                        <p style="margin:0 0 10px 0;">
+                            Your bag is currently on the belt displayed on the screen; please collect your bag.
+                        </p>
+                        <p style="margin:12px 0 0 0;">
+                            Don’t forget to check your bag tag number (<strong th:text="${bagTag}">123456789</strong>) when picking up your bag.
+                        </p>
+
+                        <p style="margin:16px 0 0 0;">
+                            <a th:href="${helpUrl}" style="display:inline-block;padding:10px 16px;background:#28a745;color:#fff;text-decoration:none;border-radius:4px;">
+                                Belt Map &amp; Help
+                            </a>
+                        </p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="padding:14px 30px;background:#fafafa;font-size:12px;color:#777;text-align:center;">
+                        For security, please keep your ID with you.
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
